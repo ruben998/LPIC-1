@@ -564,12 +564,182 @@ and open the template in the editor.
                             <p>Indica que cal executar 6 ttys (i en quins nivells) i que cal tornar-los a executar cada vegada que es finalitzin.</p>
 
                             <p><strong>chkconfig</strong> permet veure i manipular informació sobre l'activació i desactivació dels processos en cada un dels diferents nivells d'execució del sistema. Per poder consultar l'estat dels processos en cada un dels runlevels tenim la opció -list:</p>
+                            <pre><code>
+                                    $ chkconfig -list  
+                                    acpid                     0:off  1:off  2:on   3:on   4:on   5:on   6:off  
+                                    bootlogd                  0:off  1:off  2:off  3:off  4:off  5:off  6:off  S:on   
+                                    bootlogs                  0:off  1:on   2:on   3:on   4:on   5:on   6:off        
+                                    bootmisc.sh               0:off  1:off  2:off  3:off  4:off  5:off  6:off  S:on   
+                                    checkfs.sh                0:off  1:off  2:off  3:off  4:off  5:off  6:off  S:on   
+                                    ...  
+                            </code></pre>
 
+                            <p>O en el cas de voler veure només un servei en concret podem indicar-ho així:</p>
+                            <pre><code>
+                                    $ chkconfig -list ssh  
+                                    ssh                       0:off  1:off  2:on   3:on   4:on   5:on   6:off  
+                            </code></pre>
+
+                            <p>Si el que volem es canviar la configuració d'algun dels serveis ho podem fer de la següent manera:</p>
+                            <pre><code>
+                                    # chkconfig -level &lt;RUNLEVELS&gt; &lt;PROCESS&gt; &lt;ACTION&gt; 
+                            </code></pre>
+
+                            <p>on:</p>
+                            <ul>
+                                <li><strong>RUNLEVELS:</strong> nivells en els quals volem aplcar la modificació.</li>
+                                <li><strong>PROCESS:</strong> procés sobre el que volem actuar.</li>
+                                <li><strong>ACTION:</strong> què volem fer:</li>
+                                <ul>
+                                    <li><strong>on:</strong> activar el procés</li>
+                                    <li><strong>off:</strong> desactivar el procés</li>
+                                    <li><strong>reset:</strong> tornar al valor per defecte</li>
+                                </ul>
+                            </ul>
+                            <pre><code>
+                                    # chkconfig -level 35 ssh off
+                            </code></pre>
+
+                            <h5>systemd</h5>
+
+                            <p>Systemd és un servei d'admiinistració (dissenyat per sistemes GNU/Linux) per gestionar el sistema d'inici del sistema en substitució de SysV. Es basa en la utilització d'unitats, i té la capacitat de paral·lelitzar processos, per tal de fer el desplegament del sistema de manera més ràpida.</p>
+
+                            <p>Les unitats que gestiona systemd són de diferents tipus, sent les més conegudes les unitats de servei (service) o d'objectiu (target), tot i que també hi ha d'altres tipus, com unitats socket o mount</p>
+
+                            <h5>service</h5>
+
+                            <p>Aquestes unitats constitueixen els serveis del sistema. De la mateixa manera que amb SysV es poder definir les accions d'inici, parada i recàrrega de qualsevol servei, amb la comanda systemctl</p>
+
+                            <pre><code>
+                                    # systemctl start|stop|restart|reload <UNIT>.service  
+                            </code></pre>
+
+                            <h5>target</h5>
+
+                            <p>Les unitats d'objectiu (target) són unitats que agrupen un conjunt d'unitats, amb la intenció d'implementar un escenari concret dins del sistema. Buscant una comparació amb SysV, estariem davant d'una cosa semblant als runlevels. De fet, per compatibilitat entre sistemes, existeixen una sèrie de targets que realitzen les mateixes funcions que els runlevels de SysV</p>
+
+                            <h5>Relació targets|runlevels</h5>
+
+                            <table>
+                                <tr>
+                                    <td>SysV</td>
+                                    <td>systemd</td>
+                                    <td>Observacions</td>
+                                </tr>
+                                <tr>
+                                    <td>0</td>
+                                    <td>poweroff.target</td>
+                                    <td>apagada de la màquina</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>rescue.target</td>
+                                    <td>single user mode</td>
+                                </tr>
+                                <tr>
+                                    <td>2-4</td>
+                                    <td>multi-user.target</td>
+                                    <td>nivells d'execució multiusuari amb xarxa</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>graphical.target</td>
+                                    <td>nivells d'execució multiusuari amb xarxa i entorn gràfic</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>reboot.target</td>
+                                    <td>reinici del sistema</td>
+                                </tr>
+                            </table>
+
+                            <h5>Altres</h5>
+                            <ul>
+                                <li><strong>mount:</strong> unitats que gestionen punts de muntatge.</li>
+                                <li><strong>socket:</strong> unitats que permeten gestionar sockets de xarxa</li>
+                                <li><strong>snapshot:</strong> unitats que permeten recrear un instant concret del sistema (similar a targets)</li>
+                            </ul>
+
+                            <h5>systemctl</h5>
+
+                            <p>Com ja s'ha comentat, la comanda per gestionar les unitats de systemd és systemctl. Algunes de les operacions bàsiques amb systemctl que podem fer servir són:</p>
+                            <ul>
+                                <li><strong>isolate:</strong> sol·licita l'inici d'una unitat i el tancament de la unitat en execució (canviar de runlevel)</li>
+                                <li><strong>start:</strong> inicia una unitat</li>
+                                <li><strong>stop:</strong> para una unitat</li>
+                                <li><strong>status:</strong> consulta l'estat d'una unitat</li>
+                                <li><strong>enable:</strong> activar una unitat com a unitat en l'inici del sistema</li>
+                                <li><strong>disable:</strong> desactivar una unitat com a unitat en l'inici del sistema</li>
+                                <li><strong>restart:</strong> reiniciar una unitat</li>
+                                <li><strong>reload:</strong> tornar a carregar les dades de configuració d'una unitat</li>
+                                <li><strong>list-units:</strong> mostra les unitats carregades</li>
+                                <li><strong>list-unit-files:</strong> mostra totes les unitats instal·lades</li>
+                            </ul>
                         </div>
                         <br/>
                         <h6 class="title_t101-4">journactl</h6>
                         <div class="text t101-4" style="display:none">
+                            <h5>/etc/systemd/journald.conf</h5>
 
+                            <p>Per defecte, els usuaris sense privilegis només poden veure els logs del ssitema generats per ells mateixos.</p>
+                            <pre><code>
+                                storage=[persistent|volatile]   fer que els logs es guardin de forma permanent  
+                                SystemMaxUse=			màxim espai ocupat pel journal log (es pot consultar amb journalctl --disk-usage)  
+                                ForwardtoConsole		reenviar els missatges de log a una consola oberta  
+                                 TTYPath=/dev/ttyX  
+                            </code></pre>
+
+                            <h5>journalctl</h5>
+
+                            <p>La comanda journalctlens permet poder fer consultes sobre els registres que el journald administra. Algunes de les seves opcions les veiem a continuació. Si volem fer combinacions d'opcions només cal que les indiquem totes de cop. Si volem alternar-les hem de posar un "+" entre elles:</p>
+                            <ul>
+                                <li><strong>-b N</strong> mostra els missatges de l'arrencada del sistema N, on 0 és l'actual, 1 l'anterior, …</li>
+                                <li><strong>-e</strong> mostra tots els missatges i se'n va a l'últim de tots</li>
+                                <li><strong>-f</strong> permet veure els missatges mentre es van produïnt (similar a tail -f)</li>
+                                <li><strong>-k</strong> filtra els missatges relacionats amb el kernel (simmilar a dmesg</li>
+                                <li><strong>-n N</strong> mostra els N últims missatges</li>
+                                <li><strong>-o</strong> permet definir els paràmetres de sortida [verbose|json|export]</li>
+                                <li><strong>-p</strong> [PRIORITY] mostra els missatges amb prioritat igual o superior a la indicada</li>
+                                <li><strong>-r</strong> mostra els resultats en ordre invers</li>
+                                <li><strong>-u [UNIT]</strong> mostra només missatges relacionats amb la unitat indicada</li>
+                                <li><strong>–no-pager</strong> no pagina la sortida de dades</li>
+                                <li><strong>–since=N</strong> mostra els missatges a partir d'una data especificada</li>
+                                <li><strong>–until=N</strong> mostra els missatges fins a una data especificada</li>
+                                <li><strong>–utc</strong> permet veure les sortides del log en format UTC</li>
+                            </ul>
+                            <p>Si utilitzem la opció "-o verbose" podem veure més camps referents a l'entrada en el journal que per defecte no són visibles. Aquests camps també poden ser utilitzats per fer cerques dins del journald.</p>
+                            <pre><code>
+                                # journalctl -o verbose  
+                                Mon 2018-04-09 15:31:32.454210 UTC [s=ca88f19f93c14f0a9f91159b4ae5bf11;i=ba9;b=5dc54ed59edf429a988ce2b91fc98ebe;m=18dadcd52;t=5696c19b86e82;x=cdf91bf55028befa]  
+                                  PRIORITY=5  
+                                  _BOOT_ID=5dc54ed59edf429a988ce2b91fc98ebe  
+                                  _MACHINE_ID=ada7a6dc422f4f538eb35a9980cbc46e  
+                                  _HOSTNAME=virtual  
+                                  _SYSTEMD_SLICE=system.slice  
+                                  _TRANSPORT=syslog  
+                                  SYSLOG_IDENTIFIER=dbus  
+                                  SYSLOG_PID=394  
+                                  _PID=394  
+                                  _UID=107  
+                                  _GID=111  
+                                  _COMM=dbus-daemon  
+                                  _EXE=/usr/bin/dbus-daemon  
+                                  _CMDLINE=/usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation  
+                                  _CAP_EFFECTIVE=20000000  
+                                  _SYSTEMD_CGROUP=/system.slice/dbus.service  
+                                  _SYSTEMD_UNIT=dbus.service  
+                                  _SYSTEMD_INVOCATION_ID=37e2eb3bff2d4fe5bccebcb7c5219c96  
+                                  SYSLOG_FACILITY=4  
+                                  MESSAGE=[system] Failed to activate service 'org.bluez': timed out  
+                                  _SOURCE_REALTIME_TIMESTAMP=1523287892454210  
+                            </code></pre>
+
+                            <p>Així podem fer cerques de l'estil:</p>
+                            <pre><code>
+                                # journalctl _PÎD=3454  
+                                # journalctl _UID=27
+                                ...  
+                            </code></pre>
                         </div>
                     </div>
                     <br/>
@@ -2675,182 +2845,182 @@ cp SOURCE DEST
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
         <script type="text/javascript">
-                        $(document).ready(function () {
-                            /* Objectiu 101 */
-                            $(".exam-lpic-101").click(function () {
-                                $(".lpic_101_bloc").toggle('blind');
-                            });
-                            /* TOPIC 101 */
-                            $(".title_t101").click(function () {
-                                $(".t101").toggle('blind');
-                            });
+            $(document).ready(function () {
+                /* Objectiu 101 */
+                $(".exam-lpic-101").click(function () {
+                    $(".lpic_101_bloc").toggle('blind');
+                });
+                /* TOPIC 101 */
+                $(".title_t101").click(function () {
+                    $(".t101").toggle('blind');
+                });
 
-                            $(".title_t101-1").click(function () {
-                                $(".t101-1").toggle('blind');
-                            });
+                $(".title_t101-1").click(function () {
+                    $(".t101-1").toggle('blind');
+                });
 
-                            $(".title_t101-2").click(function () {
-                                $(".t101-2").toggle('blind');
-                            });
+                $(".title_t101-2").click(function () {
+                    $(".t101-2").toggle('blind');
+                });
 
-                            $(".title_t101-3").click(function () {
-                                $(".t101-3").toggle('blind');
-                            });
+                $(".title_t101-3").click(function () {
+                    $(".t101-3").toggle('blind');
+                });
 
-                            $(".title_t101-4").click(function () {
-                                $(".t101-4").toggle('blind');
-                            });
-                            /* TOPIC 102 */
-                            $(".title_t102").click(function () {
-                                $(".t102").toggle('blind');
-                            });
+                $(".title_t101-4").click(function () {
+                    $(".t101-4").toggle('blind');
+                });
+                /* TOPIC 102 */
+                $(".title_t102").click(function () {
+                    $(".t102").toggle('blind');
+                });
 
-                            $(".title_t102-1").click(function () {
-                                $(".t102-1").toggle('blind');
-                            });
+                $(".title_t102-1").click(function () {
+                    $(".t102-1").toggle('blind');
+                });
 
-                            $(".title_t102-2").click(function () {
-                                $(".t102-2").toggle('blind');
-                            });
+                $(".title_t102-2").click(function () {
+                    $(".t102-2").toggle('blind');
+                });
 
-                            $(".title_t102-3").click(function () {
-                                $(".t102-3").toggle('blind');
-                            });
+                $(".title_t102-3").click(function () {
+                    $(".t102-3").toggle('blind');
+                });
 
-                            $(".title_t102-4").click(function () {
-                                $(".t102-4").toggle('blind');
-                            });
+                $(".title_t102-4").click(function () {
+                    $(".t102-4").toggle('blind');
+                });
 
-                            /* TOPIC 103 */
-                            $(".title_t103").click(function () {
-                                $(".t103").toggle('blind');
-                            });
+                /* TOPIC 103 */
+                $(".title_t103").click(function () {
+                    $(".t103").toggle('blind');
+                });
 
-                            $(".title_t103-1").click(function () {
-                                $(".t103-1").toggle('blind');
-                            });
+                $(".title_t103-1").click(function () {
+                    $(".t103-1").toggle('blind');
+                });
 
-                            $(".title_t103-2").click(function () {
-                                $(".t103-2").toggle('blind');
-                            });
+                $(".title_t103-2").click(function () {
+                    $(".t103-2").toggle('blind');
+                });
 
-                            $(".title_t103-3").click(function () {
-                                $(".t103-3").toggle('blind');
-                            });
+                $(".title_t103-3").click(function () {
+                    $(".t103-3").toggle('blind');
+                });
 
-                            $(".title_t103-4").click(function () {
-                                $(".t103-4").toggle('blind');
-                            });
+                $(".title_t103-4").click(function () {
+                    $(".t103-4").toggle('blind');
+                });
 
-                            $(".title_t103-5").click(function () {
-                                $(".t103-5").toggle('blind');
-                            });
+                $(".title_t103-5").click(function () {
+                    $(".t103-5").toggle('blind');
+                });
 
-                            $(".title_t103-6").click(function () {
-                                $(".t103-6").toggle('blind');
-                            });
+                $(".title_t103-6").click(function () {
+                    $(".t103-6").toggle('blind');
+                });
 
-                            $(".title_t103-7").click(function () {
-                                $(".t103-7").toggle('blind');
-                            });
+                $(".title_t103-7").click(function () {
+                    $(".t103-7").toggle('blind');
+                });
 
-                            $(".title_t103-8").click(function () {
-                                $(".t103-8").toggle('blind');
-                            });
+                $(".title_t103-8").click(function () {
+                    $(".t103-8").toggle('blind');
+                });
 
-                            $(".title_t103-9").click(function () {
-                                $(".t103-9").toggle('blind');
-                            });
+                $(".title_t103-9").click(function () {
+                    $(".t103-9").toggle('blind');
+                });
 
 
-                            /* TOPIC 104 */
+                /* TOPIC 104 */
 
-                            $(".title_t104").click(function () {
-                                $(".t104").toggle('blind');
-                            });
+                $(".title_t104").click(function () {
+                    $(".t104").toggle('blind');
+                });
 
-                            $(".title_t104-1").click(function () {
-                                $(".t104-1").toggle('blind');
-                            });
+                $(".title_t104-1").click(function () {
+                    $(".t104-1").toggle('blind');
+                });
 
-                            $(".title_t104-2").click(function () {
-                                $(".t104-2").toggle('blind');
-                            });
+                $(".title_t104-2").click(function () {
+                    $(".t104-2").toggle('blind');
+                });
 
-                            $(".title_t104-3").click(function () {
-                                $(".t104-3").toggle('blind');
-                            });
+                $(".title_t104-3").click(function () {
+                    $(".t104-3").toggle('blind');
+                });
 
-                            $(".title_t104-4").click(function () {
-                                $(".t104-4").toggle('blind');
-                            });
+                $(".title_t104-4").click(function () {
+                    $(".t104-4").toggle('blind');
+                });
 
-                            /* Objectiu 102 */
-                            $(".exam-lpic-102").click(function () {
-                                $(".lpic_102_bloc").toggle('blind');
-                            });
-                            /* TOPIC 105 */
+                /* Objectiu 102 */
+                $(".exam-lpic-102").click(function () {
+                    $(".lpic_102_bloc").toggle('blind');
+                });
+                /* TOPIC 105 */
 
-                            $(".title_t105").click(function () {
-                                $(".t105").toggle('blind');
-                            });
+                $(".title_t105").click(function () {
+                    $(".t105").toggle('blind');
+                });
 
-                            $(".title_t105-1").click(function () {
-                                $(".t105-1").toggle('blind');
-                            });
+                $(".title_t105-1").click(function () {
+                    $(".t105-1").toggle('blind');
+                });
 
-                            /* TOPIC 106 */
+                /* TOPIC 106 */
 
-                            $(".title_t106").click(function () {
-                                $(".t106").toggle('blind');
-                            });
+                $(".title_t106").click(function () {
+                    $(".t106").toggle('blind');
+                });
 
-                            $(".title_t106-1").click(function () {
-                                $(".t106-1").toggle('blind');
-                            });
+                $(".title_t106-1").click(function () {
+                    $(".t106-1").toggle('blind');
+                });
 
-                            /* TOPIC 107 */
+                /* TOPIC 107 */
 
-                            $(".title_t107").click(function () {
-                                $(".t107").toggle('blind');
-                            });
+                $(".title_t107").click(function () {
+                    $(".t107").toggle('blind');
+                });
 
-                            $(".title_t107-1").click(function () {
-                                $(".t107-1").toggle('blind');
-                            });
+                $(".title_t107-1").click(function () {
+                    $(".t107-1").toggle('blind');
+                });
 
-                            /* TOPIC 108 */
+                /* TOPIC 108 */
 
-                            $(".title_t108").click(function () {
-                                $(".t108").toggle('blind');
-                            });
+                $(".title_t108").click(function () {
+                    $(".t108").toggle('blind');
+                });
 
-                            $(".title_t108-1").click(function () {
-                                $(".t108-1").toggle('blind');
-                            });
+                $(".title_t108-1").click(function () {
+                    $(".t108-1").toggle('blind');
+                });
 
-                            /* TOPIC 109 */
-                            $(".title_t109").click(function () {
-                                $(".t109").toggle('blind');
-                            });
+                /* TOPIC 109 */
+                $(".title_t109").click(function () {
+                    $(".t109").toggle('blind');
+                });
 
-                            $(".title_t109-1").click(function () {
-                                $(".t109-1").toggle('blind');
-                            });
+                $(".title_t109-1").click(function () {
+                    $(".t109-1").toggle('blind');
+                });
 
-                            /* TOPIC 110 */
-                            $(".exam-lpic-110").click(function () {
-                                $(".lpic_110_bloc").toggle('blind');
-                            });
+                /* TOPIC 110 */
+                $(".exam-lpic-110").click(function () {
+                    $(".lpic_110_bloc").toggle('blind');
+                });
 
-                            $(".title_t110").click(function () {
-                                $(".t110").toggle('blind');
-                            });
+                $(".title_t110").click(function () {
+                    $(".t110").toggle('blind');
+                });
 
-                            $(".title_t110-1").click(function () {
-                                $(".t110-1").toggle('blind');
-                            });
-                        });
+                $(".title_t110-1").click(function () {
+                    $(".t110-1").toggle('blind');
+                });
+            });
         </script>
     </body>
 </html>
